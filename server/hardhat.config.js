@@ -1,10 +1,15 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
-
-/** @type import('hardhat/config').HardhatUserConfig */
+// require("@nomiclabs/hardhat-waffle");
 
 module.exports = {
-  solidity: "0.8.24",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.24",
+      },
+    ],
+  },
   defaultNetwork: "sepolia",
   networks: {
     sepolia: {

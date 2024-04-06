@@ -1,34 +1,40 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
+contract TodoList {
+    uint public taskCount = 0;
 
-contract Lock {
-    uint public unlockTime;
-    address payable public owner;
-
-    event Withdrawal(uint amount, uint when);
-
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
-
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
+    struct Task {
+        uint id;
+        string content;
+        bool completed;
     }
 
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
+    mapping(uint => Task) public tasks;
 
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
+    event TaskCreated(
+        uint id,
+        string content,
+        bool completed
+    );
+    event TaskCompleted(
+        uint id,
+        bool completed
+    );
 
-        emit Withdrawal(address(this).balance, block.timestamp);
+    constructor() {
+        createTask("List of the tasks");
+    }
 
-        owner.transfer(address(this).balance);
+    function createTask(string memory _content) public {
+        taskCount++;
+        tasks[taskCount] = Task(taskCount, _content, false);
+        emit TaskCreated(taskCount, _content, false);
+    }
+
+    function toggleCompleted(uint _id) public {
+        Task storage _task = tasks[_id];
+        _task.completed = !_task.completed;
+        emit TaskCompleted(_id, _task.completed);
     }
 }
