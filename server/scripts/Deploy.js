@@ -4,8 +4,7 @@ const { ethers } = require("hardhat");
 async function main() {
   const TodoList = await ethers.getContractFactory("TodoList");
   const todoList = await TodoList.deploy();
-  console.log(`TodoList deployed to: ${todoList.runner.address}`);
-  console.log(`target: ${todoList.target}`);
+  console.log(`TodoList deployed to: ${todoList.target}`);
 }
 
 main()

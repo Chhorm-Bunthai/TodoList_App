@@ -12,45 +12,71 @@ import {
   Typography,
   Container,
 } from "@mui/material";
-
-function useBlockchainData() {
+function App() {
   const [taskCount, setTaskCount] = useState(0);
   const [tasks, setTasks] = useState([]);
+  const [newTaskContent, setNewTaskContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const initializeProvider = () =>
+    new ethers.providers.Web3Provider(window.ethereum);
+
+  const fetchTasks = async (provider) => {
+    const signer = provider.getSigner();
+    const todoListContract = new ethers.Contract(
+      taskContractAddress,
+      taskContractAbi,
+      signer
+    );
+    const count = await todoListContract.taskCount();
+    setTaskCount(count.toNumber());
+    const loadedTasks = [];
+    for (let i = 1; i <= count; i++) {
+      const task = await todoListContract.tasks(i);
+      loadedTasks.push({
+        id: task.id.toNumber(),
+        content: task.content,
+        completed: task.completed,
+      });
+    }
+    setTasks(loadedTasks);
+  };
 
   useEffect(() => {
-    const fetchTasks = async (provider) => {
-      try {
-        const signer = provider.getSigner();
-        const todoListContract = new ethers.Contract(
-          taskContractAddress,
-          taskContractAbi,
-          signer
-        );
-        const count = await todoListContract.taskCount();
-        setTaskCount(count.toNumber());
-        const loadedTasks = [];
-        for (let i = 1; i <= count; i++) {
-          const task = await todoListContract.tasks(i);
-          loadedTasks.push({
-            id: task.id.toNumber(),
-            content: task.content,
-            completed: task.completed,
-          });
-        }
-        setTasks(loadedTasks);
-      } catch (error) {
-        setError("Error loading blockchain data: " + error.message);
-      }
-    };
-
     const loadBlockchainData = async () => {
       try {
         if (window.ethereum && window.ethereum.isMetaMask) {
           await window.ethereum.request({ method: "eth_requestAccounts" });
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const provider = initializeProvider();
+          const todoListContract = new ethers.Contract(
+            taskContractAddress,
+            taskContractAbi,
+            provider
+          );
           await fetchTasks(provider);
+
+          // Event listeners for TaskCreated and TaskCompleted events
+          const handleTaskCreated = async (
+            taskId,
+            content,
+            completed,
+            event
+          ) => {
+            await fetchTasks(provider);
+          };
+          const handleTaskCompleted = async (taskId, completed, event) => {
+            await fetchTasks(provider);
+          };
+          todoListContract.on("TaskCreated", handleTaskCreated);
+          todoListContract.on("TaskCompleted", handleTaskCompleted);
+
+          // Cleanup function to remove event listeners when component unmounts
+          return () => {
+            todoListContract.removeListener("TaskCreated", handleTaskCreated);
+            todoListContract.removeListener(
+              "TaskCompleted",
+              handleTaskCompleted
+            );
+          };
         } else {
           setError("MetaMask not detected or not enabled!");
         }
@@ -60,23 +86,13 @@ function useBlockchainData() {
     };
 
     loadBlockchainData();
-
-    return () => {}; // Cleanup function
   }, []);
-
-  return { taskCount, tasks, loading, error };
-}
-
-function App() {
-  const [newTaskContent, setNewTaskContent] = useState("");
-
-  const { taskCount, tasks, loading, error } = useBlockchainData();
 
   const handleCreateTask = async () => {
     if (!newTaskContent) return;
     try {
       setLoading(true);
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = initializeProvider();
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const signer = provider.getSigner();
       const todoListContract = new ethers.Contract(
@@ -86,6 +102,7 @@ function App() {
       );
       await todoListContract.createTask(newTaskContent);
       setNewTaskContent("");
+      await fetchTasks(provider);
     } catch (error) {
       setError("Error creating task: " + error.message);
     } finally {
@@ -96,7 +113,7 @@ function App() {
   const handleToggleCompleted = async (taskId) => {
     try {
       setLoading(true);
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = initializeProvider();
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const signer = provider.getSigner();
       const todoListContract = new ethers.Contract(
@@ -105,6 +122,7 @@ function App() {
         signer
       );
       await todoListContract.toggleCompleted(taskId);
+      await fetchTasks(provider);
     } catch (error) {
       setError("Error toggling task completion: " + error.message);
     } finally {
@@ -125,7 +143,6 @@ function App() {
       <Typography variant="h1" component="h1">
         Todo List
       </Typography>
-      {error && <div className="error">{error}</div>}
       <div
         style={{
           display: "flex",
@@ -148,7 +165,7 @@ function App() {
             color="primary"
             onClick={handleCreateTask}
             disabled={loading}
-            style={{ width: "120px" }}
+            style={{ width: "120px", height: "56px" }}
           >
             {loading ? "Adding Task..." : "Add Task"}
           </Button>

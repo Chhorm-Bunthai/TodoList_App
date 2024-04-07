@@ -19,11 +19,6 @@ contract TodoList {
         uint id,
         bool completed
     );
-
-    constructor() {
-        createTask("List of the tasks!");
-    }
-
     function createTask(string memory _content) public {
         taskCount++;
         tasks[taskCount] = Task(taskCount, _content, false);
