@@ -209,6 +209,7 @@ function App() {
           ? `You have ${taskCount} task`
           : `You have ${taskCount} tasks`}
       </h2>
+      <h5>This app was created by Chhorm Bunthai &copy;</h5>
     </Container>
   );
 }
