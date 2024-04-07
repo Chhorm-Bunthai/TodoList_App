@@ -13,8 +13,10 @@ This Todo List application allows users to create, view, and marked their tasks 
 
 ## Usage
 
+- You have to install metamask on your browser and connect the app with it.
+- In order to install metamask you can go to [Link to download metamask extension](https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn)
 Deployed App
-The deployed app can be accessed at https://your-app-url.com.
+The deployed app can be accessed at [Link to deployed app.](https://bunthai-todolist-blockchain.vercel.app/)
 
 ### Local Development
 
@@ -26,5 +28,6 @@ To run the app locally, follow these steps:
   Navigate to the project directory:
 - cd client
 - Install dependencies: npm install
+- npm run dev
 
 Open your web browser and visit http://localhost:5173 to view the app.
