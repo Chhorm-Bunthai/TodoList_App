@@ -1,7 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
-// require("@nomiclabs/hardhat-waffle");
-
 module.exports = {
   solidity: {
     compilers: [
@@ -16,5 +14,8 @@ module.exports = {
       url: process.env.APP_URL,
       accounts: [process.env.PRIVATE_KEY],
     },
+  },
+  etherscan: {
+    apiKey: process.env.ETHER_SCAN_API_KEY,
   },
 };

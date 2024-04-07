@@ -8,7 +8,6 @@ contract TodoList {
         string content;
         bool completed;
     }
-
     mapping(uint => Task) public tasks;
 
     event TaskCreated(
@@ -22,7 +21,7 @@ contract TodoList {
     );
 
     constructor() {
-        createTask("List of the tasks");
+        createTask("List of the tasks!");
     }
 
     function createTask(string memory _content) public {
