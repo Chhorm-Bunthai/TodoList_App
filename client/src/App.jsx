@@ -17,6 +17,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [newTaskContent, setNewTaskContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const initializeProvider = () =>
     new ethers.providers.Web3Provider(window.ethereum);
 
@@ -143,6 +144,7 @@ function App() {
       <Typography variant="h1" component="h1">
         Todo List
       </Typography>
+      {error && <div>{error}</div>}
       <div
         style={{
           display: "flex",
@@ -200,6 +202,13 @@ function App() {
           </List>
         </div>
       </div>
+      <h2>
+        {taskCount === 0
+          ? null
+          : taskCount === 1
+          ? `You have ${taskCount} task`
+          : `You have ${taskCount} tasks`}
+      </h2>
     </Container>
   );
 }
